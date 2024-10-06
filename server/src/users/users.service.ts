@@ -1,10 +1,44 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { Prisma } from '@prisma/client';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
+  constructor(private readonly databaseService: DatabaseService) {}
+
+  create(createUserDto: Prisma.UserCreateInput) {
     if (!createUserDto) throw new BadRequestException("User can't be null");
-    return createUserDto;
+    return this.databaseService.user.create({
+      data: createUserDto,
+    });
+  }
+
+  findAll() {
+    return this.databaseService.user.findMany();
+  }
+
+  findOne(id: string) {
+    return this.databaseService.user.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
+
+  update(id: string, updateUserDto: Prisma.UserUpdateInput) {
+    return this.databaseService.user.update({
+      where: {
+        id,
+      },
+      data: updateUserDto,
+    });
+  }
+
+  remove(id: string) {
+    return this.databaseService.user.delete({
+      where: {
+        id,
+      },
+    });
   }
 }

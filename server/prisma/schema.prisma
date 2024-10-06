@@ -15,10 +15,10 @@ datasource db {
 
 model User {
   id String @id @default(uuid())
-  username String
-  email String
+  username String @unique
+  email String @unique
   password String
-  createdAt DateTime
+  createdAt DateTime @default(now())
   records Record[] 
 }
 
@@ -26,7 +26,7 @@ model Record {
   id String @id @default(uuid())
   promptText String
   generatedImageUrl String
-  createdAt DateTime
+  createdAt DateTime @default(now())
   canceledAt DateTime
   status Status
   userId String
