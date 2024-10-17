@@ -1,22 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
+import { CreateRecordDto } from './dto/create-record.dto';
 
 @Injectable()
 export class RecordsService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  create(createRecordDto: Prisma.RecordCreateInput) {
+  async create(createRecordDto: CreateRecordDto) {
+    if (!createRecordDto) throw new BadRequestException("User can't be null");
     return this.databaseService.record.create({
-      data: createRecordDto,
+      data: {
+        promptText: createRecordDto.promptText,
+        generatedImageUrl: createRecordDto.generatedImageUrl,
+        canceledAt: createRecordDto.canceledAt,
+        status: createRecordDto.status,
+        user: {
+          connect: { id: createRecordDto.userId },
+        },
+      },
     });
   }
 
-  findAll() {
+  async findAll() {
     return this.databaseService.record.findMany();
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     return this.databaseService.record.findUnique({
       where: {
         id,
@@ -24,7 +34,7 @@ export class RecordsService {
     });
   }
 
-  update(id: string, updateRecordDto: Prisma.RecordUpdateInput) {
+  async update(id: string, updateRecordDto: Prisma.RecordUpdateInput) {
     return this.databaseService.record.update({
       where: {
         id,
@@ -33,7 +43,7 @@ export class RecordsService {
     });
   }
 
-  remove(id: string) {
+  async remove(id: string) {
     return this.databaseService.record.delete({
       where: {
         id,

@@ -15,7 +15,7 @@ datasource db {
 
 model User {
   id String @id @default(uuid())
-  username String @unique
+  username String
   email String @unique
   password String
   createdAt DateTime @default(now())
@@ -27,9 +27,9 @@ model Record {
   promptText String
   generatedImageUrl String
   createdAt DateTime @default(now())
-  canceledAt DateTime
+  canceledAt DateTime?
   status Status
-  userId String
+  userId String @unique
   user User @relation(fields: [userId], references: [id])
 }
 
