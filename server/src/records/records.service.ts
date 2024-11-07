@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateRecordDto } from './dto/create-record.dto';
+import { UpdateRecordDto } from './dto/update-record.dto';
 
 @Injectable()
 export class RecordsService {
@@ -34,7 +34,7 @@ export class RecordsService {
     });
   }
 
-  async update(id: string, updateRecordDto: Prisma.RecordUpdateInput) {
+  async update(id: string, updateRecordDto: UpdateRecordDto) {
     return this.databaseService.record.update({
       where: {
         id,

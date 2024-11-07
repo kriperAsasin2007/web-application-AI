@@ -1,6 +1,7 @@
 import { NestFactory, HttpAdapterHost } from '@nestjs/core';
 import { WinstonModule } from 'nest-winston';
 import { instance } from 'logger/winston.logger';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { corsOptions } from './config/corsConfig';
 import { AllExceptionsFilter } from './all-exceptions.filter';
@@ -13,10 +14,9 @@ async function bootstrap() {
       instance: instance,
     }),
   });
-
+  app.use(cookieParser());
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
-
   app.enableCors(corsOptions);
   await app.listen(PORT);
 }
