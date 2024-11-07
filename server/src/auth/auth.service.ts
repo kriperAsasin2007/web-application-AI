@@ -1,5 +1,9 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Req } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Request, Response } from 'express';
+import { Res } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
+import { JwtPayload } from 'src/auth/types';
 import { DatabaseService } from 'src/database/database.service';
 import * as bcrypt from 'bcrypt';
 import { SigninDto, SignupDto } from './dto';
@@ -22,7 +26,7 @@ export class AuthService {
         id: userId,
       },
       data: {
-        hashedRt: hash,
+        refreshToken: hash,
       },
     });
   }
@@ -56,7 +60,10 @@ export class AuthService {
     };
   }
 
-  async signupLocal(signupDto: SignupDto): Promise<Tokens> {
+  async signupLocal(
+    signupDto: SignupDto,
+    @Res() response: Response,
+  ): Promise<void> {
     const hashedPassword = await this.hashData(signupDto.password);
 
     const newUser = await this.databaseService.user.create({
@@ -69,58 +76,76 @@ export class AuthService {
 
     const tokens = await this.getTokens(newUser.id, newUser.email);
     await this.updateRtHash(newUser.id, tokens.refresh_token);
-    return tokens;
+    response.cookie('refresh_token', tokens.refresh_token, {
+      httpOnly: true,
+    });
+
+    response.json({ access_token: tokens.access_token });
   }
 
-  async signinLocal(signinDto: SigninDto): Promise<Tokens> {
+  async signinLocal(
+    signinDto: SigninDto,
+    @Res() response: Response,
+  ): Promise<void> {
     const user = await this.databaseService.user.findUnique({
       where: {
         email: signinDto.email,
       },
     });
-
-    if (!user) throw new ForbiddenException('Access denied!');
+    console.log({ user });
+    if (!user) throw new ForbiddenException('No user with such email!');
     const passwordsMatches = await bcrypt.compare(
       signinDto.password,
       user.password,
     );
+    console.log({ passwordsMatches });
     if (!passwordsMatches) throw new ForbiddenException('Access denied!');
 
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
-    return tokens;
+    response.cookie('refresh_token', tokens.refresh_token, {
+      httpOnly: true,
+    });
+
+    response.json({ access_token: tokens.access_token });
   }
 
-  async logout(userId: string) {
+  async logout(userId: string, @Res() response: Response) {
     await this.databaseService.user.updateMany({
       where: {
         id: userId,
-        hashedRt: {
+        refreshToken: {
           not: null,
         },
       },
       data: {
-        hashedRt: null,
+        refreshToken: null,
       },
     });
+    response.clearCookie('refresh_token');
+    response.json({ message: 'Log out successful' });
   }
 
-  async refreshTokens(userId: string, rt: string) {
-    const user = await this.databaseService.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-    console.log({ user });
+  async refreshTokens(@Req() request: Request) {
+    const rt = request?.cookies?.refresh_token;
+    console.log({ coockieCheck: request?.cookies });
     console.log({ rt });
+    if (!rt) {
+      throw new ForbiddenException('No refresh token!');
+    }
 
-    if (!user || !user.hashedRt) throw new ForbiddenException('Access denied!');
-    const rtMathches = await bcrypt.compare(rt, user.hashedRt);
-    console.log({ testCrypt: await bcrypt.hash(rt, 10) });
-    if (!rtMathches) throw new ForbiddenException('Access denied!');
-
-    const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refresh_token);
-    return tokens;
+    // console.log({ request });
+    try {
+      // Decode the token without verifying to extract the payload
+      const decoded = jwt.decode(rt) as JwtPayload;
+      console.log({ decoded });
+      const userId = decoded?.sub || null;
+      const userEmail = decoded?.email || null;
+      const tokens = await this.getTokens(userId, userEmail);
+      // await this.updateRtHash(user.id, tokens.refresh_token);
+      return { access_token: tokens.access_token };
+    } catch {
+      throw new ForbiddenException('Error decoding token!');
+    }
   }
 }

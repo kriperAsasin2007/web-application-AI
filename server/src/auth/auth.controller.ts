@@ -4,18 +4,13 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  UseGuards,
+  Req,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto, SigninDto } from './dto';
-import { Tokens } from './types';
-
-import { RtGuard } from 'src/common/guards';
-import {
-  GetCurrentUser,
-  GetCurrentUserId,
-  PublicApi,
-} from 'src/common/decorators';
+import { GetCurrentUserId, PublicApi } from 'src/common/decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -24,31 +19,33 @@ export class AuthController {
   @PublicApi()
   @Post('local/signup')
   @HttpCode(HttpStatus.CREATED)
-  async signupLocal(@Body() signupDto: SignupDto): Promise<Tokens> {
-    return this.authService.signupLocal(signupDto);
+  async signupLocal(
+    @Body() signupDto: SignupDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    return this.authService.signupLocal(signupDto, response);
   }
 
   @PublicApi()
   @Post('local/signin')
   @HttpCode(HttpStatus.OK)
-  async signinLocal(@Body() signinDto: SigninDto): Promise<Tokens> {
-    return this.authService.signinLocal(signinDto);
+  async signinLocal(
+    @Body() signinDto: SigninDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    return this.authService.signinLocal(signinDto, response);
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@GetCurrentUserId() userId: string) {
-    return this.authService.logout(userId);
+  logout(@GetCurrentUserId() userId: string, @Res() response: Response) {
+    return this.authService.logout(userId, response);
   }
 
   @PublicApi()
-  @UseGuards(RtGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refreshTokens(
-    @GetCurrentUserId() userId: string,
-    @GetCurrentUser('refreshToken') rt: string,
-  ) {
-    return this.authService.refreshTokens(userId, rt);
+  async refreshTokens(@Req() request: Request) {
+    return this.authService.refreshTokens(request);
   }
 }
