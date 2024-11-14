@@ -7,17 +7,16 @@ export const GetCurrentUserId = createParamDecorator(
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers['authorization'];
     console.log('in decorator');
-    if (!authHeader) return null; // No Authorization header found
+    if (!authHeader) return null;
 
-    const token = authHeader.split(' ')[1]; // Extract the token from "Bearer <token>"
+    const token = authHeader.split(' ')[1];
     if (!token) return null;
 
     try {
-      // Decode the token without verifying to extract the payload
       const decoded = jwt.decode(token) as JwtPayload;
       console.log({ decoded });
 
-      return decoded?.sub || null; // Return the user ID (sub) or null if it doesn't exist
+      return decoded?.sub || null;
     } catch (error) {
       console.log('Error decoding token:', error);
       return null;

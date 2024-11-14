@@ -134,15 +134,12 @@ export class AuthService {
       throw new ForbiddenException('No refresh token!');
     }
 
-    // console.log({ request });
     try {
-      // Decode the token without verifying to extract the payload
       const decoded = jwt.decode(rt) as JwtPayload;
       console.log({ decoded });
       const userId = decoded?.sub || null;
       const userEmail = decoded?.email || null;
       const tokens = await this.getTokens(userId, userEmail);
-      // await this.updateRtHash(user.id, tokens.refresh_token);
       return { access_token: tokens.access_token };
     } catch {
       throw new ForbiddenException('Error decoding token!');

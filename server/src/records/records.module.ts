@@ -7,5 +7,6 @@ import { DatabaseModule } from 'src/database/database.module';
   imports: [DatabaseModule],
   controllers: [RecordsController],
   providers: [RecordsService, Logger],
+  exports: [RecordsService],
 })
 export class RecordsModule {}

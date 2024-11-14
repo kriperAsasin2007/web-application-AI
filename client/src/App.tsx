@@ -3,6 +3,7 @@ import "./App.css";
 import Home from "./pages/Home/Home";
 import SignIn from "./pages/SignIn/SignIn";
 import SignUp from "./pages/SignUp/SignUp";
+import Journal from "./pages/Journal/Journal";
 
 function App() {
   const router = createBrowserRouter([
@@ -17,6 +18,10 @@ function App() {
     {
       path: "/sign-up",
       element: <SignUp />,
+    },
+    {
+      path: "/journal",
+      element: <Journal />,
     },
   ]);
 

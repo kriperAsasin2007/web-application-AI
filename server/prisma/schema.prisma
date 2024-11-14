@@ -26,11 +26,12 @@ model User {
 model Record {
   id String @id @default(uuid())
   promptText String
-  generatedImageUrl String
+  generatedImageUrl String?
   createdAt DateTime @default(now())
   canceledAt DateTime?
   status Status
-  userId String @unique
+  size Size?
+  userId String
   user User @relation(fields: [userId], references: [id])
 }
 
@@ -38,4 +39,10 @@ enum Status {
   CANCELED
   PENDING
   DONE
+}
+
+enum Size {
+  LARGE
+  MEDIUM
+  SMALL
 }

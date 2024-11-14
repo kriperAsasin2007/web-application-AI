@@ -12,6 +12,7 @@ import {
 import { RecordsService } from './records.service';
 import { CreateRecordDto } from './dto/create-record.dto';
 import { UpdateRecordDto } from './dto/update-record.dto';
+import { GetCurrentUserId } from 'src/common/decorators';
 
 @Controller('records')
 export class RecordsController {
@@ -40,6 +41,12 @@ export class RecordsController {
   async findAll() {
     this.logger.log(`Fetching all records`, RecordsController.name);
     return this.recordsService.findAll();
+  }
+
+  @Get('/user')
+  async getByUserId(@GetCurrentUserId() userId: string) {
+    this.logger.log(`Fetching all records by user id`, RecordsController.name);
+    return this.recordsService.getByUserId(userId);
   }
 
   @Get(':id')

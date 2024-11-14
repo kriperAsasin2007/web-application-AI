@@ -1,4 +1,5 @@
 import { Module, Logger } from '@nestjs/common';
+import { RedisModule } from '@nestjs-modules/ioredis';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -9,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './common/guards';
 import { AuthService } from './auth/auth.service';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [
@@ -17,6 +19,11 @@ import { AuthService } from './auth/auth.service';
     RecordsModule,
     DatabaseModule,
     AuthModule,
+    ImagesModule,
+    RedisModule.forRoot({
+      type: 'single',
+      url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+    }),
   ],
   controllers: [AppController, AuthController],
   providers: [

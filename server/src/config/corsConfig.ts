@@ -1,4 +1,4 @@
-const allowedOrigins = [process.env.FRONTEND_URL];
+const allowedOrigins = [process.env.FRONTEND_URL, process.env.NGINX_URL];
 
 export const corsOptions = {
   credentials: true,
