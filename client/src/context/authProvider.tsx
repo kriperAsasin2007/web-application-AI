@@ -21,7 +21,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  console.log({ context });
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
@@ -30,13 +29,11 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessToken] = useState(null);
-  console.log({ accessToken });
 
   useEffect(() => {
     const fetchMe = async () => {
       try {
         const response = await refreshTokens();
-        console.log({ fetchMeRes: response });
         setAccessToken(response.access_token);
       } catch {
         setAccessToken(null);
@@ -47,7 +44,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useLayoutEffect(() => {
     const authInterceptor = axiosInstance.interceptors.request.use((config) => {
-      console.log("request interseptor");
       config.headers.Authorization =
         !config._retry && accessToken
           ? `Bearer ${accessToken}`
@@ -66,14 +62,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (response) => response,
       async (error) => {
         const originlRequest = error.config;
-        console.log({ error });
-        console.log({ testMSG: error.response.data.response.message });
+
         if (
           error.response.status === 403 &&
           error.response.data.response.message === "Not valid JWT"
         ) {
           try {
-            console.log("in try");
             const token = await refreshTokens();
 
             setAccessToken(token.access_token);
@@ -86,7 +80,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             logout();
           }
         }
-        console.log("after if");
         return Promise.reject(error);
       }
     );

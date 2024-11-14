@@ -15,6 +15,7 @@ export class RecordsService {
         generatedImageUrl: createRecordDto.generatedImageUrl,
         canceledAt: createRecordDto.canceledAt,
         status: createRecordDto.status,
+        size: createRecordDto.size,
         user: {
           connect: { id: createRecordDto.userId },
         },
@@ -24,6 +25,14 @@ export class RecordsService {
 
   async findAll() {
     return this.databaseService.record.findMany();
+  }
+
+  async getByUserId(userId: string) {
+    return this.databaseService.record.findMany({
+      where: {
+        userId,
+      },
+    });
   }
 
   async findOne(id: string) {

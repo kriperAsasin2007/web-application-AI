@@ -6,15 +6,14 @@ import {
   IsEnum,
   IsDateString,
 } from 'class-validator';
-import { Status } from '@prisma/client';
+import { Size, Status } from '@prisma/client';
 
 export class CreateRecordDto {
   @IsString()
   @IsNotEmpty()
   promptText: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   generatedImageUrl: string;
 
   @IsDateString()
@@ -25,7 +24,27 @@ export class CreateRecordDto {
   @IsNotEmpty()
   status: Status;
 
+  @IsEnum(Size)
+  @IsOptional()
+  size: Size;
+
   @IsUUID()
   @IsNotEmpty()
   userId: string;
+
+  constructor(
+    promptText: string,
+    generatedImageUrl: string,
+    status: Status,
+    size: Size,
+    userId: string,
+    canceledAt?: string,
+  ) {
+    this.promptText = promptText;
+    this.generatedImageUrl = generatedImageUrl;
+    this.status = status;
+    this.size = size;
+    this.userId = userId;
+    this.canceledAt = canceledAt;
+  }
 }
