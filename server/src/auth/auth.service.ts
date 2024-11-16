@@ -19,18 +19,6 @@ export class AuthService {
     return bcrypt.hash(data, 10);
   }
 
-  async updateRtHash(userId: string, rt: string) {
-    const hash = await this.hashData(rt);
-    await this.databaseService.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        refreshToken: hash,
-      },
-    });
-  }
-
   async getTokens(userId: string, email: string): Promise<Tokens> {
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(
@@ -75,7 +63,6 @@ export class AuthService {
     });
 
     const tokens = await this.getTokens(newUser.id, newUser.email);
-    await this.updateRtHash(newUser.id, tokens.refresh_token);
     response.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true,
     });
@@ -102,7 +89,6 @@ export class AuthService {
     if (!passwordsMatches) throw new ForbiddenException('Access denied!');
 
     const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refresh_token);
     response.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true,
     });
@@ -111,17 +97,6 @@ export class AuthService {
   }
 
   async logout(userId: string, @Res() response: Response) {
-    await this.databaseService.user.updateMany({
-      where: {
-        id: userId,
-        refreshToken: {
-          not: null,
-        },
-      },
-      data: {
-        refreshToken: null,
-      },
-    });
     response.clearCookie('refresh_token');
     response.json({ message: 'Log out successful' });
   }
