@@ -10,7 +10,7 @@ export class ImagesController {
 
   @Post('/cancel')
   async cancel(@Body() cancelDto: CancelDto) {
-    return this.imagesService.cancel(cancelDto);
+    return await this.imagesService.cancel(cancelDto);
   }
 
   @Post('/generate')

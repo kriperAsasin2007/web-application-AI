@@ -11,6 +11,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './common/guards';
 import { AuthService } from './auth/auth.service';
 import { ImagesModule } from './images/images.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -20,6 +21,12 @@ import { ImagesModule } from './images/images.module';
     DatabaseModule,
     AuthModule,
     ImagesModule,
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST,
+        port: Number.parseInt(process.env.REDIS_PORT, 10),
+      },
+    }),
     RedisModule.forRoot({
       type: 'single',
       url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,

@@ -24,10 +24,10 @@ function ImageRow({ generateImageDto }: IImageRowProps) {
       try {
         const result = await generateImages(generateImageDto);
         setImageUrl(result.imageUrl);
-      } catch (error) {
-      } finally {
-        setIsLoading(false);
-      }
+      } catch (error) {}
+      //  finally {
+      //   setIsLoading(false);
+      // }
     };
 
     generate();
